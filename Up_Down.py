@@ -65,7 +65,7 @@ detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
 
 # Capture video
-cap = cv.VideoCapture(0)
+cap = cv.VideoCapture("/home/atamuratov_e/Desktop/New_Up_Down/Screencast from 18-09-23 20:42:09.webm")
 
 vis = 0
 not_vis = 0
@@ -104,15 +104,15 @@ while True:
                     visible = False
                     break
             if visible:
-                tongue_status = "UP"
+                tongue_status = "DOWN"
                 vis += 1
                 vis / 100 == 0
-                print('UP')
+                print('DOWN')
             else:
-                tongue_status = "DOWN"
+                tongue_status = "UP"
                 not_vis += 1
                 not_vis / 100 == 0
-                print('DOWN')
+                print('UP')
 
             cv.putText(frame, tongue_status, (10, 60), cv.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
