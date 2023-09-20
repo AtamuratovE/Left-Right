@@ -57,72 +57,167 @@
 
 
 
+# import cv2 as cv
+# import dlib
+
+# # Load dlib's face detector and predictor
+# detector = dlib.get_frontal_face_detector()
+# predictor = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
+
+# # Capture video
+# cap = cv.VideoCapture(0)
+
+# vis = 0
+# not_vis = 0
+
+# while True:
+#     ret, frame = cap.read()
+#     gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+
+#     faces = detector(gray)
+#     for face in faces:
+#         landmarks = predictor(gray, face)
+
+#         # Determine mouth status (open or closed)
+#         top_lip_center = ((landmarks.part(51).x + landmarks.part(52).x + landmarks.part(53).x + landmarks.part(50).x) // 4, 
+#                         (landmarks.part(51).y + landmarks.part(52).y + landmarks.part(53).y + landmarks.part(50).y) // 4)
+
+#         bottom_lip_center = ((landmarks.part(57).x + landmarks.part(58).x + landmarks.part(59).x + landmarks.part(56).x) // 4, 
+#                             (landmarks.part(57).y + landmarks.part(58).y + landmarks.part(59).y + landmarks.part(56).y) // 4)
+
+#         tongue_tip = (landmarks.part(67).x, landmarks.part(67).y)  # Assuming landmark 67 is the tip, adjust as necessary
+
+#         distance_to_top_lip = abs(tongue_tip[1] - top_lip_center[1])
+#         distance_to_bottom_lip = abs(tongue_tip[1] - bottom_lip_center[1])
+
+#         if distance_to_top_lip < distance_to_bottom_lip:
+#             mouth_status = "closed"
+#         else:
+#             mouth_status = "open"
+#             # If the mouth is open, check for tongue status
+#             points_idx = [68, 67, 66]
+#             visible = True
+#             for idx in points_idx:
+#                 x = landmarks.part(idx-1).x
+#                 y = landmarks.part(idx-1).y
+#                 if gray[y, x] < 45:
+#                     visible = False
+#                     break
+#             if visible:
+#                 tongue_status = "DOWN"
+#                 vis += 1
+#                 vis / 100 == 0
+#                 print('DOWN')
+#             else:
+#                 tongue_status = "UP"
+#                 not_vis += 1
+#                 not_vis / 100 == 0
+#                 print('UP')
+
+#             cv.putText(frame, tongue_status, (10, 60), cv.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+
+#         # Display mouth status
+#         cv.putText(frame, "Mouth: " + mouth_status, (10, 30), cv.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+    
+#     cv.imshow("Frame", frame)
+    
+#     if cv.waitKey(1) & 0xFF == ord('q'):
+#         break
+
+# cap.release()
+# cv.destroyAllWindows()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import cv2 as cv
 import dlib
 
-# Load dlib's face detector and predictor
-detector = dlib.get_frontal_face_detector()
-predictor = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
+def load_dlib_models():
+    detector = dlib.get_frontal_face_detector()
+    predictor = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
+    return detector, predictor
 
-# Capture video
-cap = cv.VideoCapture("/home/atamuratov_e/Desktop/New_Up_Down/Screencast from 18-09-23 20:42:09.webm")
+def detect_faces(gray, detector):
+    return detector(gray)
 
-vis = 0
-not_vis = 0
-
-while True:
-    ret, frame = cap.read()
-    gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
-
-    faces = detector(gray)
-    for face in faces:
-        landmarks = predictor(gray, face)
-
-        # Determine mouth status (open or closed)
-        top_lip_center = ((landmarks.part(51).x + landmarks.part(52).x + landmarks.part(53).x + landmarks.part(50).x) // 4, 
-                        (landmarks.part(51).y + landmarks.part(52).y + landmarks.part(53).y + landmarks.part(50).y) // 4)
-
-        bottom_lip_center = ((landmarks.part(57).x + landmarks.part(58).x + landmarks.part(59).x + landmarks.part(56).x) // 4, 
-                            (landmarks.part(57).y + landmarks.part(58).y + landmarks.part(59).y + landmarks.part(56).y) // 4)
-
-        tongue_tip = (landmarks.part(67).x, landmarks.part(67).y)  # Assuming landmark 67 is the tip, adjust as necessary
-
-        distance_to_top_lip = abs(tongue_tip[1] - top_lip_center[1])
-        distance_to_bottom_lip = abs(tongue_tip[1] - bottom_lip_center[1])
-
-        if distance_to_top_lip < distance_to_bottom_lip:
-            mouth_status = "closed"
-        else:
-            mouth_status = "open"
-            # If the mouth is open, check for tongue status
-            points_idx = [68, 67, 66]
-            visible = True
-            for idx in points_idx:
-                x = landmarks.part(idx-1).x
-                y = landmarks.part(idx-1).y
-                if gray[y, x] < 53:
-                    visible = False
-                    break
-            if visible:
-                tongue_status = "DOWN"
-                vis += 1
-                vis / 100 == 0
-                print('DOWN')
-            else:
-                tongue_status = "UP"
-                not_vis += 1
-                not_vis / 100 == 0
-                print('UP')
-
-            cv.putText(frame, tongue_status, (10, 60), cv.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-
-        # Display mouth status
-        cv.putText(frame, "Mouth: " + mouth_status, (10, 30), cv.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+def get_mouth_status(landmarks):
+    top_lip_center = (
+        (landmarks.part(51).x + landmarks.part(52).x + landmarks.part(53).x + landmarks.part(50).x) // 4, 
+        (landmarks.part(51).y + landmarks.part(52).y + landmarks.part(53).y + landmarks.part(50).y) // 4
+    )
+    bottom_lip_center = (
+        (landmarks.part(57).x + landmarks.part(58).x + landmarks.part(59).x + landmarks.part(56).x) // 4, 
+        (landmarks.part(57).y + landmarks.part(58).y + landmarks.part(59).y + landmarks.part(56).y) // 4
+    )
+    tongue_tip = (landmarks.part(67).x, landmarks.part(67).y)
     
-    cv.imshow("Frame", frame)
-    
-    if cv.waitKey(1) & 0xFF == ord('q'):
-        break
+    distance_to_top_lip = abs(tongue_tip[1] - top_lip_center[1])
+    distance_to_bottom_lip = abs(tongue_tip[1] - bottom_lip_center[1])
 
-cap.release()
-cv.destroyAllWindows()
+    if distance_to_top_lip < distance_to_bottom_lip:
+        return "closed"
+    else:
+        return "open"
+
+def get_tongue_status(landmarks, gray):
+    points_idx = [68, 67, 66]
+    visible = True
+    for idx in points_idx:
+        x = landmarks.part(idx-1).x
+        y = landmarks.part(idx-1).y
+        if gray[y, x] < 53:
+            visible = False
+            break
+    return "DOWN" if visible else "UP"
+
+def main():
+    detector, predictor = load_dlib_models()
+    cap = cv.VideoCapture(0)
+
+    vis = 0
+    not_vis = 0
+
+    while True:
+        ret, frame = cap.read()
+        gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+        faces = detect_faces(gray, detector)
+        
+        for face in faces:
+            landmarks = predictor(gray, face)
+            mouth_status = get_mouth_status(landmarks)
+            
+            if mouth_status == "open":
+                tongue_status = get_tongue_status(landmarks, gray)
+                if tongue_status == "DOWN":
+                    vis += 1
+                else:
+                    not_vis += 1
+
+                cv.putText(frame, tongue_status, (10, 60), cv.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+
+            cv.putText(frame, "Mouth: " + mouth_status, (10, 30), cv.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+        
+        cv.imshow("Frame", frame)
+        
+        if cv.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    cap.release()
+    cv.destroyAllWindows()
+
+if __name__ == "__main__":
+    main()
